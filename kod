@@ -1,0 +1,43 @@
+import rospy
+from clover import srv
+from std_srvs.srv import Trigger
+from aruco_pose.msg import MarkerArray
+from clover.srv import SetLEDEffect
+
+rospy.init_node('flight')
+
+get_telemetry = rospy.ServiceProxy('get_telemetry', srv.GetTelemetry)
+navigate = rospy.ServiceProxy('navigate', srv.Navigate)
+navigate_global = rospy.ServiceProxy('navigate_global', srv.NavigateGlobal)
+set_position = rospy.ServiceProxy('set_position', srv.SetPosition)
+set_velocity = rospy.ServiceProxy('set_velocity', srv.SetVelocity)
+set_attitude = rospy.ServiceProxy('set_attitude', srv.SetAttitude)
+set_rates = rospy.ServiceProxy('set_rates', srv.SetRates)
+set_effect = rospy.ServiceProxy('led/set_effect', SetLEDEffect)
+land = rospy.ServiceProxy('land', Trigger)
+
+#Взлет на высоту 3 метра со скоростью 0,5 км/ч с задержкой 10 секунд
+navigate(x=0, y=0, z=3, speed=0.5, frame_id='body', auto_arm=True)
+rospy.sleep(10)
+
+#Включение подсветки красным цветом с задержкой 2 секунды
+set_effect(r=255, g=0, b=0)
+rospy.sleep(2)
+
+#Полет на отметку aruco_1 со скоростью 0,5 км/ч со снижением до 2 метров и ожиданием 40 секунд
+navigate(speed=0.5, frame_id='aruco_1', x=0, y=0, z=2)
+rospy.sleep(40)
+
+#Полет на отметку aruco_70 со скоростью 0,5 км/ч на высоте 2 метра и ожиданием 40 секунд
+navigate(speed=0.5, frame_id='aruco_70', x=0, y=0, z=2)
+rospy.sleep(40)
+
+navigate(speed=0.5, frame_id='aruco_23', x=0, y=0, z=3)
+rospy.sleep(40)
+
+#Включение подсветки зеленым цветом с задержкой 2 секунды
+set_effect(r=0, g=255, b=0)
+rospy.sleep(2)
+
+#Посадка дрона в заданную точку
+land()
